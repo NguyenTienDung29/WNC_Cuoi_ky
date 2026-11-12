@@ -1,0 +1,12 @@
+'use strict';
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const {parseEvent,sports} = require('../src/validation');
+const base = () => ({title:'Giải bóng đá cộng đồng 2026',sport:'Bóng đá',venue:'Sân thể thao A',city:'TP. Hồ Chí Minh',start_time:'2030-02-20T09:00:00+07:00',capacity:120,price:0,description:'Giải phong trào',theme:'emerald',status:'open',organizer:'Câu lạc bộ A',contact_email:'contact@example.com'});
+test('accept a valid event and normalize time',()=>{const values=parseEvent(base());assert.equal(values.length,12);assert.equal(values[1],'Bóng đá');assert.equal(values[4],'2030-02-20T02:00:00.000Z');});
+test('reject bad title',()=>assert.throws(()=>parseEvent({...base(),title:'abc'}),/Tên sự kiện/));
+test('reject invalid sport',()=>assert.throws(()=>parseEvent({...base(),sport:'Esports'}),/Môn thể thao/));
+test('reject noninteger capacity',()=>assert.throws(()=>parseEvent({...base(),capacity:3.14}),/Sức chứa/));
+test('reject negative price',()=>assert.throws(()=>parseEvent({...base(),price:-10}),/Giá tham gia/));
+test('reject invalid email',()=>assert.throws(()=>parseEvent({...base(),contact_email:'invalid'}),/email liên hệ/));
+test('all predefined sports are valid choices',()=>{for(const sport of sports)assert.doesNotThrow(()=>parseEvent({...base(),sport}));});

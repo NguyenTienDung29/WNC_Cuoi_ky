@@ -1,0 +1,33 @@
+name: SportHub CI - Build Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Express source
+        working-directory: backend
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm test
+      - name: Build React application
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Build Docker images
+        run: |
+          docker build -t sporthub-api:ci ./backend
+          docker build -t sporthub-web:ci ./frontend
